@@ -3,20 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <!-- PWA (Uygulama) Ayarları -->
+    <!-- PWA Linkleri -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#6366f1">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <title>Vocabo</title>
-    <!-- PWA Manifest -->
-    <link rel="manifest" href="manifest.json">
-    <!-- iOS PWA -->
-    <link rel="apple-touch-icon" href="icons/icon-192.png">
-    <meta name="apple-mobile-web-app-title" content="Vocabo">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <!-- Theme color -->
-    <meta name="theme-color" content="#6366f1">
+    
+    <title>Akıllı Kelime Kartlarım</title>
     <!-- Modern Font -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- MQTT (Bulut) -->
     <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
     <style>
         :root {
@@ -26,35 +22,21 @@
             --border: #e2e8f0; --zor: #ef4444; --tekrar: #f59e0b; --ogrenildi: #10b981; 
             --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
             --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
-        
-        body { 
-            background-color: var(--bg-color); display: flex; justify-content: center; 
-            color: var(--text-main); height: 100vh; height: 100dvh; overflow: hidden; 
-        }
+        body { background-color: var(--bg-color); display: flex; justify-content: center; color: var(--text-main); height: 100vh; height: 100dvh; overflow: hidden; }
 
-        .app-container { 
-            width: 100%; max-width: 480px; background: var(--card-bg); height: 100%; 
-            display: flex; flex-direction: column; position: relative; 
-        }
+        .app-container { width: 100%; max-width: 480px; background: var(--card-bg); height: 100%; display: flex; flex-direction: column; position: relative; }
 
-        header { 
-            padding: 20px 20px 15px; border-bottom: 1px solid var(--border); 
-            display: flex; justify-content: space-between; align-items: center;
-            background: var(--card-bg); z-index: 10; flex-shrink: 0;
-        }
-        header h1 { font-size: 22px; font-weight: 700; color: var(--text-main); letter-spacing: -0.5px; }
+        header { padding: 20px 20px 15px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: var(--card-bg); z-index: 10; flex-shrink: 0; }
+        header h1 { font-size: 22px; font-weight: 700; color: var(--text-main); }
         header p { font-size: 14px; color: var(--text-muted); margin-top: 4px; }
         .cloud-status { font-size: 11px; font-weight: 700; color: var(--text-muted); background: #f1f5f9; padding: 6px 12px; border-radius: 20px; display: none; display: flex; align-items: center; gap: 5px;}
         .cloud-status.online { background: #ecfdf5; color: var(--ogrenildi); }
 
-        nav { 
-            display: flex; justify-content: space-around; padding: 10px 15px; 
-            background: var(--card-bg); border-bottom: 1px solid var(--border); 
-            gap: 8px; z-index: 10; flex-shrink: 0;
-        }
+        nav { display: flex; justify-content: space-around; padding: 10px 15px; background: var(--card-bg); border-bottom: 1px solid var(--border); gap: 8px; z-index: 10; flex-shrink: 0; }
         nav button { flex: 1; background: var(--bg-color); border: 1px solid var(--border); color: var(--text-muted); font-size: 12px; font-weight: 600; padding: 10px 0; border-radius: 10px; transition: all 0.2s; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px; }
         nav button.active { background: var(--primary); color: white; border-color: var(--primary); }
 
@@ -66,19 +48,13 @@
         .input-group { margin-bottom: 16px; position: relative;}
         .input-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
         .input-group label { font-size: 13px; font-weight: 600; color: var(--text-muted); margin: 0;}
-        
         .action-btn { background: #eff6ff; color: var(--primary); border: 1px solid #bfdbfe; border-radius: 8px; padding: 4px 10px; font-size: 11px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px;}
-        
         input[type="text"], select, textarea { width: 100%; padding: 14px 16px; background-color: var(--bg-color); border: 1px solid var(--border); border-radius: 12px; font-size: 15px; color: var(--text-main); outline: none; }
         textarea { resize: vertical; min-height: 50px; font-size: 14px; }
-        
         .btn-main { width: 100%; padding: 16px; background-color: var(--primary); color: white; border: none; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 10px; margin-bottom: 20px;}
-        
         .divider { display: flex; align-items: center; text-align: center; color: var(--text-muted); font-size: 13px; font-weight: 500; margin: 24px 0; }
         .divider::before, .divider::after { content: ''; flex: 1; border-bottom: 1px solid var(--border); }
-        .divider:not(:empty)::before { margin-right: 10px; }
-        .divider:not(:empty)::after { margin-left: 10px; }
-
+        
         .profile-card { text-align: center; padding: 20px; background: var(--bg-color); border-radius: 20px; border: 1px solid var(--border); margin-bottom: 20px; }
         .profile-pic { width: 80px; height: 80px; border-radius: 50%; border: 3px solid white; box-shadow: var(--shadow-md); margin-bottom: 12px; }
         .profile-name { font-size: 20px; font-weight: 700; color: var(--text-main); }
@@ -101,10 +77,8 @@
         .study-container { display: flex; flex-direction: column; height: 100%; }
         .study-top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; gap: 10px; flex-shrink: 0;}
         .study-top-bar select { flex: 1; margin: 0; }
-        
         .btn-back { background: white; border: 1px solid var(--border); color: var(--text-main); padding: 14px 15px; border-radius: 12px; cursor: pointer; font-weight: 600; font-size: 14px; box-shadow: var(--shadow-sm); display: none; }
         .btn-back.show { display: block; }
-
         .action-buttons { display: flex; gap: 10px; display: none; margin-bottom: 15px; flex-shrink: 0; }
         .action-buttons.show { display: flex; }
         .action-buttons button { flex: 1; padding: 14px 0; border: none; border-radius: 12px; color: white; font-weight: 600; font-size: 15px; cursor: pointer; box-shadow: var(--shadow-sm);}
@@ -113,11 +87,9 @@
         .btn-ogrenildi { background-color: var(--ogrenildi); }
 
         .flashcard { width: 100%; flex: 1; min-height: 250px; background-color: white; border: 1px solid var(--border); border-radius: 20px; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; text-align: center; padding: 30px 20px; box-shadow: var(--shadow-md); position: relative; overflow-y: auto; }
-        
         .word-header { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 8px;}
         .word-title { font-size: 32px; font-weight: 700; margin: 0;}
         .btn-speak { background: #eff6ff; color: var(--primary); border: none; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 18px; box-shadow: 0 2px 4px rgba(99, 102, 241, 0.15);}
-
         .hint-text { font-size: 13px; color: var(--text-muted); font-weight: 500; margin-top: auto;}
         .card-details { display: none; width: 100%; margin-top: 24px; }
         .card-details.show { display: block; animation: fadeIn 0.3s ease; }
@@ -126,7 +98,6 @@
         .example-box { background: #eff6ff; padding: 14px; border-radius: 12px; text-align: left; border-left: 4px solid var(--primary); margin-top: 10px; position: relative;}
         .example-en { font-size: 15px; font-weight: 600; color: var(--text-main); margin-bottom: 6px; display: block; line-height: 1.4; padding-right: 35px;} 
         .example-tr { font-size: 14px; color: var(--text-muted); display: block; font-style: italic;}
-        
         .btn-speak-small { position: absolute; top: 12px; right: 12px; background: white; color: var(--primary); border: 1px solid #bfdbfe; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 14px; box-shadow: var(--shadow-sm);}
 
         .list-filters { display: flex; overflow-x: auto; gap: 8px; padding-bottom: 12px; margin-bottom: 12px; -webkit-overflow-scrolling: touch;}
@@ -150,6 +121,15 @@
         .empty-state { text-align: center; padding: 30px 20px; color: var(--text-muted); font-size: 14px; background: var(--bg-color); border-radius: 16px; border: 1px dashed var(--border);}
         .loading { display: none; text-align: center; font-size: 12px; color: var(--primary); font-weight: 600; margin-bottom: 10px; }
         .success-msg { display: none; text-align: center; color: var(--ogrenildi); font-weight: 600; font-size: 14px; margin-top: 15px; background: #ecfdf5; padding: 10px; border-radius: 8px; margin-bottom: 20px;}
+        
+        /* Toggle Switch Checkbox CSS */
+        .switch { position: relative; display: inline-block; width: 40px; height: 22px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #cbd5e1; transition: .4s; border-radius: 34px; }
+        .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--primary); }
+        input:checked + .slider:before { transform: translateX(18px); }
+        .voice-setting-row { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); }
     </style>
 </head>
 <body>
@@ -161,7 +141,6 @@
                 <p id="header-desc">Kendi listeni oluştur.</p>
             </div>
             <div id="cloud-status" class="cloud-status">☁️ Bekleniyor</div>
-            <button id="install-btn" onclick="installApp()" style="display:none; background:#eff6ff; color:var(--primary); border:1px solid #bfdbfe; border-radius:10px; padding:8px 12px; font-size:12px; font-weight:700; cursor:pointer; align-items:center; gap:5px;">📲 Yükle</button>
         </header>
 
         <nav>
@@ -172,6 +151,7 @@
         </nav>
 
         <main>
+            <!-- 1. EKLE SEKME -->
             <div id="ekle" class="tab-content active">
                 <div class="input-group">
                     <div class="input-header">
@@ -180,14 +160,11 @@
                     </div>
                     <input type="text" id="wordEn" placeholder="Bir kelime yaz...">
                 </div>
-
                 <div class="input-group">
                     <label>Türkçe Anlamı</label>
                     <input type="text" id="wordTr" placeholder="Anlamını yaz veya üstteki butonu kullan">
                 </div>
-
                 <div id="loadingText" class="loading">Sözlükte aranıyor... ⏳</div>
-
                 <div class="input-group" style="margin-top: 24px;">
                     <div class="input-header">
                         <label>Örnek Cümle (Dilersen Düzenle)</label>
@@ -195,12 +172,10 @@
                     </div>
                     <textarea id="prevEn" rows="2" placeholder="Cümleyi kendin yazabilir veya butona basabilirsin..."></textarea>
                 </div>
-
                 <div class="input-group">
                     <label>Çevirisi (Dilersen Düzenle)</label>
                     <textarea id="prevTr" rows="2" placeholder="Cümlenin çevirisi..."></textarea>
                 </div>
-
                 <button class="btn-main" onclick="addWord()">Koleksiyona Ekle</button>
                 <div id="add-status" class="success-msg">Kelime eklendi! 🎉</div>
 
@@ -213,9 +188,9 @@
                 </div>
             </div>
 
+            <!-- 2. ÇALIŞ SEKME -->
             <div id="calis" class="tab-content" style="height: 100%;">
                 <div class="study-container">
-                    
                     <div class="study-top-bar">
                         <button id="btn-back" class="btn-back" onclick="goBackToPreviousCard()">⏪ Geri</button>
                         <select id="studyFilter" onchange="startStudy()">
@@ -226,15 +201,12 @@
                             <option value="all">Tüm Kelimelerim</option>
                         </select>
                     </div>
-                    
                     <div id="no-cards" class="empty-state" style="display: none;">Çalışacak kelime bulunamadı.</div>
-                    
                     <div class="action-buttons" id="action-buttons">
                         <button class="btn-zor" onclick="markCard('Zor', event)">Zor</button>
                         <button class="btn-tekrar" onclick="markCard('Tekrar', event)">Tekrar</button>
                         <button class="btn-ogrenildi" onclick="markCard('Öğrenildi', event)">Öğrenildi</button>
                     </div>
-
                     <div id="study-area" style="flex: 1; display: flex; flex-direction: column;">
                         <div class="flashcard" onclick="flipCard(event)">
                             <div class="word-header">
@@ -255,6 +227,7 @@
                 </div>
             </div>
 
+            <!-- 3. LİSTE SEKME -->
             <div id="liste" class="tab-content">
                 <div class="list-filters">
                     <button class="filter-btn active" data-filter="all" onclick="filterList('all', this)">Tümü</button>
@@ -266,6 +239,7 @@
                 <div id="list-content"></div>
             </div>
 
+            <!-- 4. PROFIL SEKME -->
             <div id="profil" class="tab-content">
                 <div id="login-section">
                     <div class="profile-card">
@@ -286,13 +260,22 @@
                         <button style="background: none; border: none; color: var(--zor); font-size: 13px; font-weight: bold; cursor: pointer;" onclick="logout()">Hesaptan Çıkış Yap</button>
                     </div>
 
-                    <!-- ARKA PLAN BİLDİRİM KUTUSU -->
+                    <!-- BİLDİRİM VE SES AYAR KUTUSU -->
                     <div class="sync-info-box" style="border-color: var(--tekrar);">
-                        <strong style="color: var(--tekrar);">🔔 Tekrar Vakti Bildirimleri</strong>
-                        Telefon kapalıyken bile "Tekrar" listenden bildirim atması için bu butona bas.
+                        <strong style="color: var(--tekrar);">🔔 Tekrar Bildirimleri (2 Dakika)</strong>
+                        Telefon kapalıyken bile "Tekrar" listenden bildirim atması için başlatın.
                         <button class="profile-action-btn btn-notify" id="notify-btn" onclick="requestBackgroundNotifications()" style="margin-top: 10px; margin-bottom: 0;">
                             🔔 Bildirimleri Başlat
                         </button>
+                        
+                        <!-- Sesli Okuma Toggle Butonu -->
+                        <div class="voice-setting-row">
+                            <span style="font-size: 13px; font-weight: 600; color: var(--text-main);">🔊 Bildirimi Sesli Oku</span>
+                            <label class="switch">
+                                <input type="checkbox" id="voiceToggle" onchange="toggleVoiceSetting()">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
                     </div>
 
                     <div class="sync-info-box">
@@ -311,8 +294,32 @@
         </main>
     </div>
 
-    <!-- ARKA PLAN BİLDİRİM (SERVICE WORKER) YÖNETİCİSİ -->
+    <!-- PWA & BİLDİRİM YÖNETİCİSİ SCRIPTİ -->
     <script>
+        // Ses ayarını yükle
+        const voiceToggle = document.getElementById('voiceToggle');
+        voiceToggle.checked = localStorage.getItem('ducards_voice') === 'true';
+
+        function toggleVoiceSetting() {
+            localStorage.setItem('ducards_voice', voiceToggle.checked);
+        }
+
+        // Service Worker'ı ana sayfada kaydet
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js').then((reg) => {
+                console.log('Service Worker Kaydedildi!', reg);
+            }).catch(err => console.log('SW Hatası:', err));
+            
+            // Service Worker'dan ses okuma (SPEAK) mesajı gelirse
+            navigator.serviceWorker.addEventListener('message', event => {
+                if (event.data && event.data.type === 'SPEAK') {
+                    if(localStorage.getItem('ducards_voice') === 'true') {
+                        speakTextByString(event.data.word);
+                    }
+                }
+            });
+        }
+
         let isNotifying = false;
         
         async function requestBackgroundNotifications() {
@@ -323,55 +330,49 @@
                 btn.classList.remove('active-notify');
                 isNotifying = false;
                 
-                // Arka plan işçisini durdur
-                navigator.serviceWorker.getRegistrations().then(function(registrations) {
-                    for(let registration of registrations) {
-                        registration.unregister();
-                    }
-                });
+                // Arka plana STOP komutu gönder
+                if (navigator.serviceWorker.controller) {
+                    navigator.serviceWorker.controller.postMessage({ type: 'STOP' });
+                }
                 alert("Bildirimler durduruldu.");
                 return;
             }
 
             const tekrarList = flashcards.filter(c => c.status === 'Tekrar');
             if (tekrarList.length === 0) {
-                alert("Şu an 'Tekrar' listende hiç kelime yok!");
+                alert("Şu an 'Tekrar' listende hiç kelime yok! Çalışırken kelimeleri tekrar listesine atın.");
                 return;
             }
 
-            // Bildirim İzni İste (Sistem seviyesinde zorunludur)
+            // Kilit ekranında sesin çalışabilmesi için ses motorunu ilk tıklamayla "sessizce" uyandırıyoruz (Audio Unlock)
+            speakTextByString("");
+
             let permission = await Notification.requestPermission();
             
             if (permission !== "granted") {
-                alert("Telefon ayarlarına gidip bu tarayıcı (Chrome/Edge/Safari) için 'Bildirimlere İzin Ver' seçeneğini açmalısın. Yoksa telefon kilitliyken sistem bildirim göndermez.");
+                alert("Lütfen telefonunuzun ayarlarından veya adres çubuğundaki kilitten Bildirimlere İZİN VERİN.");
                 return;
             }
 
-            // PWA ve Service Worker Kontrolü
-            if ('serviceWorker' in navigator) {
-                try {
-                    const registration = await navigator.serviceWorker.ready;
-                    
-                    registration.active.postMessage({
-                        type: 'START_NOTIFY',
-                        cards: tekrarList
-                    });
-                    
-                    registration.showNotification("Harika! 🎉", {
-                        body: "Telefonunu kapatsan bile artık her 5 dakikada bir kelime göndereceğim.",
-                        icon: "./icons/icon-192.png"
-                    });
+            if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+                // Arka plana listeyi yolla ve başlat
+                navigator.serviceWorker.controller.postMessage({
+                    type: 'START',
+                    cards: tekrarList
+                });
+                
+                btn.innerText = "🔕 Bildirimleri Durdur";
+                btn.classList.add('active-notify');
+                isNotifying = true;
+                
+                // Demo Bildirim
+                new Notification("Sistem Aktif! 🚀", {
+                    body: "Ekranı kapatsan bile 2 dakikada bir bildirim atacağım.",
+                    icon: "icon-192.png"
+                });
 
-                    btn.innerText = "🔕 Bildirimleri Durdur";
-                    btn.classList.add('active-notify');
-                    isNotifying = true;
-
-                } catch (e) {
-                    console.log(e);
-                    alert("Tarayıcınız veya telefonunuz arka plan bildirimlerini (Service Worker) desteklemiyor olabilir. En iyi deneyim için bu siteyi Vercel veya Github Pages gibi bir yere yükleyip telefonunuza 'Uygulama Olarak Ekle' demelisiniz.");
-                }
             } else {
-                alert("Bu tarayıcı arka plan bildirimlerini desteklemiyor.");
+                alert("Servis Çalışanı (sw.js) bulunamadı. Lütfen GitHub Pages ayarlarınızı kontrol edin.");
             }
         }
     </script>
@@ -388,12 +389,14 @@
 
         function speakText(type, event) {
             event.stopPropagation(); 
-            if (!('speechSynthesis' in window)) return;
             let text = type === 'word' ? document.getElementById('card-word').innerText : document.getElementById('card-exampleEn').innerText;
-            if(text) {
-                window.speechSynthesis.cancel();
-                const utterance = new SpeechSynthesisUtterance(text); utterance.lang = 'en-US'; utterance.rate = 0.9; window.speechSynthesis.speak(utterance);
-            }
+            speakTextByString(text);
+        }
+        
+        function speakTextByString(text) {
+            if(!text || !('speechSynthesis' in window)) return;
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(text); utterance.lang = 'en-US'; utterance.rate = 0.9; window.speechSynthesis.speak(utterance);
         }
 
         function initCloudSync() {
@@ -447,28 +450,6 @@
             } else if (email) alert("Geçerli bir mail adresi girmelisin.");
         }
         function logout() { if(confirm("Emin misiniz?")) { userProfile = null; localStorage.removeItem('my_ducards_user'); if(mqttClient) mqttClient.end(); checkUserLogin(); } }
-
-        // --- PWA: Service Worker Kaydı ---
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js')
-                    .then(reg => console.log('Vocabo SW kayıtlı:', reg.scope))
-                    .catch(err => console.log('SW hatası:', err));
-            });
-        }
-
-        // --- PWA: "Ana Ekrana Ekle" Butonu ---
-        let deferredPrompt = null;
-        const installBtn = document.getElementById('install-btn');
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault(); deferredPrompt = e;
-            if (installBtn) installBtn.style.display = 'flex';
-        });
-        function installApp() {
-            if (!deferredPrompt) return; deferredPrompt.prompt();
-            deferredPrompt.userChoice.then(() => { deferredPrompt = null; if (installBtn) installBtn.style.display = 'none'; });
-        }
-        window.addEventListener('appinstalled', () => { if (installBtn) installBtn.style.display = 'none'; });
         function sendListToEmail() {
             if(flashcards.length === 0) return;
             let text = `Merhaba ${userProfile.name},\n\n`;
@@ -476,7 +457,7 @@
             window.location.href = `mailto:${userProfile.email}?subject=Kelimelerim Yedeği&body=${encodeURIComponent(text)}`;
         }
 
-        const headers = { 'ekle': { title: 'Vocabo', desc: 'Kendi listeni oluştur.' }, 'calis': { title: 'Kartları Çalış', desc: 'Öğrenme seviyene göre antrenman yap.' }, 'liste': { title: 'Koleksiyonum', desc: 'Tüm kelimelerine göz at.' }, 'profil': { title: 'Profilim', desc: 'Bulut ayarları ve yedekleme.' } };
+        const headers = { 'ekle': { title: 'Kelime Ekle', desc: 'Kendi listeni oluştur.' }, 'calis': { title: 'Kartları Çalış', desc: 'Öğrenme seviyene göre antrenman yap.' }, 'liste': { title: 'Koleksiyonum', desc: 'Tüm kelimelerine göz at.' }, 'profil': { title: 'Profilim', desc: 'Bulut ayarları ve yedekleme.' } };
         function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active')); document.querySelectorAll('nav button').forEach(el => el.classList.remove('active'));
             document.getElementById(tabId).classList.add('active'); document.getElementById('nav-' + tabId).classList.add('active');
